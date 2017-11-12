@@ -16,6 +16,7 @@ void mysh_parse_command(const char* command,
 
   int ti = 0;
 
+ 
   while (tok != NULL) {
     struct single_command* com = *commands + ti;
     parse_single_command(tok, &com->argc, &com->argv);
@@ -39,6 +40,7 @@ void parse_single_command(const char* command,
   char buf[4096];
   strcpy(buf, command);
 
+
   char *saveptr = NULL;
   char *tok = strtok_r(buf, " \n\t", &saveptr);
 
@@ -61,3 +63,4 @@ void parse_single_command(const char* command,
     (*argv)[0][0] = '\0';
   }
 }
+

@@ -39,6 +39,7 @@ int do_pwd(int argc, char** argv);
 
 int do_fg(int argc, char** argv);
 
+int do_bin(int argc, char** argv);
 /**
   validate_cd_argv(argc, argv)
 
@@ -58,4 +59,5 @@ int validate_pwd_argv(int argc, char** argv);
 
 int validate_fg_argv(int argc, char** argv);
 
+int validate_bin_argv(int argc, char** argv);
 #endif // BUILT_IN_H_

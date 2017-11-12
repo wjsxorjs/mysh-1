@@ -3,13 +3,25 @@
 #include <string.h>
 #include <assert.h>
 
+#include <pthread.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+
+#define SERVER_PATH "tpf_unix_sock.server"
+
+
 #include "commands.h"
 #include "built_in.h"
+
+
 
 static struct built_in_command built_in_commands[] = {
   { "cd", do_cd, validate_cd_argv },
   { "pwd", do_pwd, validate_pwd_argv },
-  { "fg", do_fg, validate_fg_argv }
+  { "fg", do_fg, validate_fg_argv },
+ { "Howdooyuevenwritethis", do_bin, validate_bin_argv}
+
 };
 
 static int is_built_in_command(const char* command_name)
@@ -28,10 +40,17 @@ static int is_built_in_command(const char* command_name)
 /*
  * Description: Currently this function only handles single built_in commands. You should modify this structure to launch process and offer pipeline functionality.
  */
+
+
 int evaluate_command(int n_commands, struct single_command (*commands)[512])
 {
-  if (n_commands > 0) {
-    struct single_command* com = (*commands);
+
+
+
+
+
+if (n_commands > 0) {
+    struct single_command* com = (*commands)+(n_commands-1);
 
     assert(com->argc != 0);
 
@@ -48,12 +67,34 @@ int evaluate_command(int n_commands, struct single_command (*commands)[512])
     } else if (strcmp(com->argv[0], "") == 0) {
       return 0;
     } else if (strcmp(com->argv[0], "exit") == 0) {
+    
       return 1;
-    } else {
+    }
+
+else if(built_in_commands[3].command_validate(com->argc, com->argv)){
+
+
+if (built_in_commands[3].command_do(com->argc, com->argv) !=0){
+fprintf(stderr,"%s: Error occurs\n",com->argv[0]);
+}
+
+
+
+}
+else if(!(built_in_commands[3].command_validate(com->argc, com->argv))){
+fprintf(stderr,"%s: command not found\n", com->argv[0]);
+return -1;
+}
+
+
+ else {
       fprintf(stderr, "%s: command not found\n", com->argv[0]);
       return -1;
     }
   }
+
+
+
 
   return 0;
 }
