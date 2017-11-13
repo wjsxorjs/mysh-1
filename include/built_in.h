@@ -40,6 +40,8 @@ int do_pwd(int argc, char** argv);
 int do_fg(int argc, char** argv);
 
 int do_bin(int argc, char** argv);
+
+void bg(int argc, char** argv);
 /**
   validate_cd_argv(argc, argv)
 

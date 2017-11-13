@@ -56,8 +56,10 @@ if (n_commands > 0) {
 
     int built_in_pos = is_built_in_command(com->argv[0]);
     if (built_in_pos != -1) {
-      if (built_in_commands[built_in_pos].command_validate(com->argc, com->argv)) {
-        if (built_in_commands[built_in_pos].command_do(com->argc, com->argv) != 0) {
+        if(built_in_commands[built_in_pos].command_validate(com->argc, com->argv) == 2){
+}
+    else if (built_in_commands[built_in_pos].command_validate(com->argc, com->argv)==1){
+        if (built_in_commands[built_in_pos].command_do(com->argc, com->argv) != 0){ 
           fprintf(stderr, "%s: Error occurs\n", com->argv[0]);
         }
       } else {
@@ -71,7 +73,8 @@ if (n_commands > 0) {
       return 1;
     }
 
-else if(built_in_commands[3].command_validate(com->argc, com->argv)){
+else if(built_in_commands[3].command_validate(com->argc, com->argv)==2){}
+else if(built_in_commands[3].command_validate(com->argc, com->argv)==1){
 
 
 if (built_in_commands[3].command_do(com->argc, com->argv) !=0){
