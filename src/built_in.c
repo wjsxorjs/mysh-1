@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
+
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -34,6 +36,8 @@ return 0;
   if (chdir(argv[1]) == -1)
     return -1;
 
+
+
   return 0;
 }
 
@@ -60,15 +64,10 @@ return 0;
 
 int do_fg(int argc, char** argv) {
 
+
   if (!validate_fg_argv(argc, argv))
     return -1;
   bg(argc, argv);
-
-if(validate_cd_argv(argc,argv)==1){do_cd(argc,argv);     return 0;}
-if(validate_pwd_argv(argc,argv)==1){do_pwd(argc,argv);   return 0;}
-if(validate_bin_argv(argc,argv)==1){do_bin(argc,argv);   return 0;}
-
-
 
 
   return 0;
@@ -76,12 +75,31 @@ if(validate_bin_argv(argc,argv)==1){do_bin(argc,argv);   return 0;}
 
 int do_bin(int argc, char** argv){
 
+
+int client_socket, rc;
+    struct sockaddr_un remote; 
+    char nuf[256];
+    memset(&remote, 0, sizeof(struct sockaddr_un));
+    
+    client_socket = socket(AF_UNIX, SOCK_DGRAM, 0);
+    if (client_socket == -1) {
+        printf("SOCKET ERROR\n");
+        exit(1);
+    }
+
+    remote.sun_family = AF_UNIX;        
+    strcpy(remote.sun_path, SERVER_PATH); 
+
+
+
 int val = validate_bin_argv(argc, argv);
 
  if(val == 0){
+close(client_socket);
    return -1;
 }
 if (val == 2){
+close(client_socket);
 return 0;
 }
 
@@ -89,12 +107,19 @@ int pid = fork();
 if(pid  < 0){exit(1);}
 
 else if (pid  == 0){
-execv(argv[0],argv);
+strcpy(nuf,execv(argv[0],argv));
 }
 
 
 wait(NULL);
 
+    rc = sendto(client_socket, nuf, strlen(nuf), 0, (struct sockaddr *) &remote, sizeof(remote));
+    if (rc == -1) {
+        close(client_socket);
+        exit(1);
+    }
+
+    rc = close(client_socket);
 
 
 return 0;
@@ -177,50 +202,38 @@ return 0;
 
 }
 
-int A;
-char* B[256];
 
 
 void bg(int argc, char **argv){
 
 
 if(strcmp(argv[0],"fg") == 0){
-
-if( B[0] == NULL && A == 0){
-
 printf("fg: current: No such job\n");
-
-
-}
-else{
-
-argc = A;
-A = 0;
-for(int i=0; i<argc; i++){
-argv[i]== B[i];
-}
-int pid = getpid();
-printf("[%d] Done\t %s\n",pid,B[0]);
-
 }
 
-}
 
 else{
+int a=0;
 int pid = getpid();
-printf("[%d]\n",pid);
+printf("[%d]\t%s\n",pid,argv[0]);
 
-A = argc;
-for(int i=0; i<A; i++){
-B[i] = argv[i];
-}
 int child = fork();
 if(child==0){
-if(validate_cd_argv(argc,argv)==1){do_cd(argc,argv);  return;}
-if(validate_pwd_argv(argc,argv)==1){for(int i=0; i<2048; i++){sleep(10);}do_pwd(argc,argv); return;}
-if(validate_bin_argv(argc,argv)==1){ argv[argc]=NULL;  do_bin(argc,argv); return;}
+if(validate_cd_argv(argc,argv)==1){
+do_cd(argc,argv); a=1 ; return;}
+if(validate_pwd_argv(argc,argv)==1){
+do_pwd(argc,argv); a=1; return;}
+if(validate_bin_argv(argc,argv)==1){
+ argv[argc]=NULL; a=1; do_bin(argc,argv);
+ return;}
 }
+else {
+if(a==1){
+kill(child,SIGKILL);
+return;
 
+}
+}
 }
 
 
