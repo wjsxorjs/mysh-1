@@ -50,7 +50,16 @@ int evaluate_command(int n_commands, struct single_command (*commands)[512])
 
 
 if (n_commands > 0) {
-    struct single_command* com = (*commands)+(n_commands-1);
+    struct single_command* com = (*commands);
+
+if(strcmp(com->argv[0],"ls")==0){strcpy(com->argv[0],"/bin/ls");}
+if(strcmp(com->argv[0],"cat")==0){strcpy(com->argv[0],"/bin/cat");}
+if(strcmp(com->argv[0],"vim")==0){strcpy(com->argv[0],"/usr/bin/vim");}
+if(strcmp(com->argv[0],"grep")==0){strcpy(com->argv[0],"/bin/grep");}
+
+
+
+
 
     assert(com->argc != 0);
 

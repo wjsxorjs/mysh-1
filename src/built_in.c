@@ -64,9 +64,9 @@ int do_fg(int argc, char** argv) {
     return -1;
   bg(argc, argv);
 
-if(validate_cd_argv(argc,argv)==0){do_cd(argc,argv);     return 0;}
-if(validate_pwd_argv(argc,argv)==0){do_pwd(argc,argv);   return 0;}
-if(validate_bin_argv(argc,argv)==0){do_bin(argc,argv);   return 0;}
+if(validate_cd_argv(argc,argv)==1){do_cd(argc,argv);     return 0;}
+if(validate_pwd_argv(argc,argv)==1){do_pwd(argc,argv);   return 0;}
+if(validate_bin_argv(argc,argv)==1){do_bin(argc,argv);   return 0;}
 
 
 
@@ -81,9 +81,9 @@ int val = validate_bin_argv(argc, argv);
  if(val == 0){
    return -1;
 }
-if (val == 2)
+if (val == 2){
 return 0;
-
+}
 
 int pid = fork();
 if(pid  < 0){exit(1);}
@@ -148,6 +148,8 @@ int validate_fg_argv(int argc, char** argv) {
 int validate_bin_argv(int argc, char** argv){
 if(strcmp(argv[argc-1],"&")==0){
 bg(argc-1, argv);
+
+
 return 2;
 }
 
@@ -184,21 +186,22 @@ void bg(int argc, char **argv){
 
 if(strcmp(argv[0],"fg") == 0){
 
-printf("%d %s\n",A, B[0]);
+if( B[0] == NULL && A == 0){
 
-if( B[0] != NULL && A != 0){
-argc = A;
-A = 0;
-for(int i=0; i<argc; i++){
-strcpy(argv[i], B[i]);
-}
-int pid = getpid();
-printf("[%d] Done\t %s\n",pid,argv[0]);
+printf("fg: current: No such job\n");
 
 
 }
 else{
-printf("Don't have an job in background\n");
+
+argc = A;
+A = 0;
+for(int i=0; i<argc; i++){
+argv[i]== B[i];
+}
+int pid = getpid();
+printf("[%d] Done\t %s\n",pid,B[0]);
+
 }
 
 }
@@ -207,10 +210,16 @@ else{
 int pid = getpid();
 printf("[%d]\n",pid);
 
-
-if(validate_cd_argv(argc,argv)==0){do_cd(argc,argv);     return 0;}
-if(validate_pwd_argv(argc,argv)==0){do_pwd(argc,argv);   return 0;}
-if(validate_bin_argv(argc,argv)==0){do_bin(argc,argv);   return 0;}
+A = argc;
+for(int i=0; i<A; i++){
+B[i] = argv[i];
+}
+int child = fork();
+if(child==0){
+if(validate_cd_argv(argc,argv)==1){do_cd(argc,argv);  return;}
+if(validate_pwd_argv(argc,argv)==1){for(int i=0; i<2048; i++){sleep(10);}do_pwd(argc,argv); return;}
+if(validate_bin_argv(argc,argv)==1){ argv[argc]=NULL;  do_bin(argc,argv); return;}
+}
 
 }
 
