@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <unistd.h>
 
 #include <pthread.h>
 #include <sys/types.h>
@@ -9,6 +10,7 @@
 #include <sys/un.h>
 
 #define SOCK_PATH "tpf_unix_sock.server"
+#define SERVER_PATH "tpf_unix_sock.server"
 
 
 #include "commands.h"
@@ -60,9 +62,12 @@ if(strcmp(com->argv[0],"grep")==0){strcpy(com->argv[0],"/bin/grep");}
 
 
     assert(com->argc != 0);
-
+/*  */
 
 if(n_commands == 2){
+
+
+struct single_command* com = (*commands) +1;
 
 int server_sock, len, rc;
 int bytes_rec = 0;
@@ -78,7 +83,7 @@ server_sock = socket(AF_UNIX, SOCK_DGRAM, 0);
     }
 
 server_sockaddr.sun_family = AF_UNIX;
-    strcpy(server_sockaddr.sun_path, SOCK_PATH); 
+    strcpy(server_sockaddr.sun_path, SOCK_PATH);
     len = sizeof(server_sockaddr);
     unlink(SOCK_PATH);
     rc = bind(server_sock, (struct sockaddr *) &server_sockaddr, len);
@@ -89,20 +94,43 @@ server_sockaddr.sun_family = AF_UNIX;
 
 
 
-
-
-    bytes_rec = recvfrom(server_sock, nuf, 256, 0, (struct sockaddr *) &peer_sock, &len);
-    if (bytes_rec == -1){
-        close(server_sock);
+if(!fork())
+{
+int client_socket, rc;
+    struct sockaddr_un remote; 
+    char nuf[256];
+    memset(&remote, 0, sizeof(struct sockaddr_un));
+    
+    client_socket = socket(AF_UNIX, SOCK_DGRAM, 0);
+    if (client_socket == -1) {
+        printf("SOCKET ERROR\n");
         exit(1);
     }
 
- close(server_sock);
+    remote.sun_family = AF_UNIX;        
+    strcpy(remote.sun_path, SERVER_PATH); 
 
+
+
+execv(com->argv[0],com->argv);
+read(server_sock,nuf,256);
+
+}
+else
+{
+wait(NULL);
+
+
+
+struct single_command* com = (*commands);
+
+execv(com->argv[0],com->argv);
+
+}
 return 0;
 }
 
-
+/* */
 
     int built_in_pos = is_built_in_command(com->argv[0]);
     if (built_in_pos != -1) {

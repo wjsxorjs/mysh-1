@@ -11,7 +11,7 @@
 int main()
 {
 
-printf("My code perform process creation & signal handling without causing error\nSo I would like to ask you to grade those two first and then the others.\nThank you for consideration\n");
+printf("My code perform process creation & signal handling without causing error\nSo I would like to ask you to grade those two first and then the others.\nThank you for consideration\n\n\n");
   char buf[8096]; 
   while (1) {
    signal(SIGINT,catch_sigint);
